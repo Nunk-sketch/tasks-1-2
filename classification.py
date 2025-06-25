@@ -127,13 +127,20 @@ for model_name, metrics in results.items():
     print(f"Accuracy: {np.mean(metrics['Accuracy']):.3f} ± {np.std(metrics['Accuracy']):.3f}")
     print(f"F1 Score: {np.mean(metrics['F1']):.3f} ± {np.std(metrics['F1']):.3f}")
     
-    # Print last classification report
     print("\nLast Fold Classification Report:")
-    print(classification_report(
-        None, None, 
-        target_names=label_encoder.classes_,
-        output_dict=metrics['Report'][-1]
-    ))
+    last_report = metrics['Report'][-1]
+    # Convert the dictionary report to a string format
+    report_str = ""
+    for class_name in label_encoder.classes_:
+        report_str += f"{class_name}\n"
+        report_str += f"  Precision: {last_report[class_name]['precision']:.2f}\n"
+        report_str += f"  Recall:    {last_report[class_name]['recall']:.2f}\n"
+        report_str += f"  F1-score:  {last_report[class_name]['f1-score']:.2f}\n"
+        report_str += f"  Support:   {last_report[class_name]['support']}\n\n"
+    report_str += f"Accuracy: {last_report['accuracy']:.2f}\n"
+    report_str += f"Macro avg: {last_report['macro avg']['f1-score']:.2f}\n"
+    report_str += f"Weighted avg: {last_report['weighted avg']['f1-score']:.2f}"
+    print(report_str)
 
 # Statistical comparison
 print("\n=== Model Comparison ===")
