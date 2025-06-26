@@ -48,7 +48,7 @@ n_splits = min(5, len(groups.unique()))
 gkf = GroupKFold(n_splits=n_splits)
 print(f"\nUsing GroupKFold with {n_splits} splits, grouping by '{groups.name}'.")
 
-# Evaluate Each Model 
+# Evaluate  Models 
 for name, model in models.items():
     print(f"\n Evaluating {name} ")
     all_predictions = np.array([])
@@ -84,7 +84,7 @@ for name, model in models.items():
     print("\nClassification Report:")
     print(classification_report(all_true_labels, all_predictions, zero_division=0))
 
-    # Optional: Confusion Matrix
+    #  Conf Matrix
     true_named = label_encoder.inverse_transform(all_true_labels.astype(int))
     pred_named = label_encoder.inverse_transform(all_predictions.astype(int))
     cm = confusion_matrix(true_named, pred_named, labels=['Low', 'Elevated'])
@@ -98,6 +98,6 @@ for name, model in models.items():
     plt.tight_layout()
     plt.show()
 
-# --- 8. Final class distribution ---
+#class distribution 
 print("\nFinal class distribution after binning:")
 print(y_binned.value_counts())

@@ -13,14 +13,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import ttest_rel
 
-# Import from your classes file
+
 from classes import create_classes, FrustrationClassifier, FrustrationDataset, train_classifier, evaluate_classifier
 
-# Set random seeds for reproducibility
 torch.manual_seed(42)
 np.random.seed(42)
 
-# Load and prepare data
+# Load  data
 data = pd.read_csv('HR_data.csv')
 data['Frustration_Class'] = data['Frustrated'].apply(create_classes)
 
@@ -36,18 +35,18 @@ features.extend([
     'HR_Mean_puzzler', 'HR_Mean_instructor', 'HR_Mean_diff'
 ])
 
-# Prepare data arrays
+#  arrays
 X = data[features].values
 y = data['Frustration_Class'].values
 groups = data['Individual'].values
 
-# Encode labels and standardize features
+# Encode labels and standardize
 label_encoder = LabelEncoder()
 y_encoded = label_encoder.fit_transform(y)  # 0=Low, 1=Medium, 2=High
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# Initialize results storage
+
 logo = LeaveOneGroupOut()
 results = {
     'RandomForest': {'Accuracy': [], 'F1': [], 'Report': []},
@@ -55,16 +54,16 @@ results = {
 }
 conf_matrices = []
 
-# Main LOIO loop
+#  LOIO loop
 for train_idx, test_idx in logo.split(X_scaled, y_encoded, groups):
     X_train, X_test = X_scaled[train_idx], X_scaled[test_idx]
     y_train, y_test = y_encoded[train_idx], y_encoded[test_idx]
     
-    # Get the actual classes present in this fold
+    #
     present_classes = np.unique(np.concatenate([y_train, y_test]))
     present_class_names = [label_encoder.classes_[i] for i in present_classes]
     
-    # ========== Random Forest ==========
+    #Random Forest
     rf = RandomForestClassifier(
         n_estimators=200,
         max_depth=5,
@@ -86,7 +85,7 @@ for train_idx, test_idx in logo.split(X_scaled, y_encoded, groups):
         )
     )
     
-    # ========== Neural Network ==========
+    #  Neural Network
     train_dataset = FrustrationDataset(X_train, y_train)
     train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
     
@@ -97,7 +96,7 @@ for train_idx, test_idx in logo.split(X_scaled, y_encoded, groups):
     
     model = train_classifier(model, train_loader, criterion, optimizer, epochs=100)
     
-    # Evaluate NN with dynamic class handling
+    # Evaluate NN 
     eval_results = evaluate_classifier(
         model, 
         X_test, 
@@ -106,12 +105,12 @@ for train_idx, test_idx in logo.split(X_scaled, y_encoded, groups):
         labels=present_classes
     )
     
-    # Store NN results
+    # Store NN 
     results['NeuralNetwork']['Accuracy'].append(eval_results['accuracy'])
     results['NeuralNetwork']['F1'].append(eval_results['f1'])
     results['NeuralNetwork']['Report'].append(eval_results['report'])
     
-    # Store confusion matrices for last fold
+    # Store confusion matrices 
     if len(conf_matrices) < 1:
         conf_matrices.append({
             'RF': confusion_matrix(y_test, y_pred_rf, labels=present_classes),
@@ -120,8 +119,8 @@ for train_idx, test_idx in logo.split(X_scaled, y_encoded, groups):
             'classes': present_class_names
         })
 
-# ========== Results Analysis ==========
-print("\n=== Average Performance Across Folds ===")
+# Results Analysis 
+print("\n Average Performance Across Folds") 
 for model_name, metrics in results.items():
     print(f"\n{model_name}:")
     print(f"Accuracy: {np.mean(metrics['Accuracy']):.3f} ± {np.std(metrics['Accuracy']):.3f}")
@@ -143,7 +142,7 @@ for model_name, metrics in results.items():
     print(report_str)
 
 # Statistical comparison
-print("\n=== Model Comparison ===")
+print("\n Model Comparison") 
 for metric in ['Accuracy', 'F1']:
     rf_scores = results['RandomForest'][metric]
     nn_scores = results['NeuralNetwork'][metric]
@@ -158,7 +157,7 @@ for metric in ['Accuracy', 'F1']:
     else:
         print("No significant difference")
 
-# ========== Visualization ==========
+# Visualization 
 # Confusion matrices
 fig, ax = plt.subplots(1, 2, figsize=(14, 6))
 for i, (model, matrix) in enumerate(conf_matrices[0].items()):

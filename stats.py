@@ -75,7 +75,7 @@ print("\nPaired t-test results for classification report metrics (Random Forest 
 
 
 for metric in metrics:
-    # Only compare for classes '0.0' and '1.0'
+    # Only compare for classes '0.0' and '1.0' ( elevated(0) and low(1))
     rf_vals = pd.to_numeric(rf_report.loc[['0.0', '1.0'], metric], errors='coerce')
     lr_vals = pd.to_numeric(lr_report.loc[['0.0', '1.0'], metric], errors='coerce')
     # Skip if any value is missing
